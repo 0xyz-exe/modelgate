@@ -1,9 +1,10 @@
 """Chat completion endpoint"""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.db.session import get_db
 from app.middleware.auth import get_auth_context, AuthContext
+from app.middleware.rate_limit import check_rate_limit
 from app.models.request import ChatCompletionRequest, ChatCompletionResponse, Choice, ChatMessage, UsageInfo
 from app.providers.demo import DemoProvider
 from app.providers.base import ChatRequest
@@ -17,11 +18,19 @@ router = APIRouter()
 async def chat_completion(
     request: ChatCompletionRequest,
     auth: AuthContext = Depends(get_auth_context),
+    rate_limit_info: dict = Depends(check_rate_limit),
     db: Session = Depends(get_db),
+    response: Response = None,
 ):
     """Chat completion endpoint"""
     start_time = time.time()
     started_at = datetime.utcnow()
+    
+    # Add rate limit headers to response
+    if response:
+        response.headers["X-RateLimit-Limit"] = str(rate_limit_info["limit"])
+        response.headers["X-RateLimit-Remaining"] = str(rate_limit_info["remaining"])
+        response.headers["X-RateLimit-Reset"] = str(rate_limit_info["reset"])
     
     # ponytail: rate limits, quota checks - add when needed
     
