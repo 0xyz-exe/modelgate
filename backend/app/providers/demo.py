@@ -4,7 +4,6 @@ from app.providers.base import (
     ProviderAdapter,
     ChatRequest,
     ChatResponse,
-    UsageInfo,
     ProviderHealth,
 )
 
@@ -33,12 +32,10 @@ class DemoProvider(ProviderAdapter):
             id=f"demo_{uuid.uuid4().hex[:16]}",
             model=f"demo-{request.model}",
             content=content,
-            usage=UsageInfo(
-                prompt_tokens=int(input_tokens),
-                completion_tokens=int(output_tokens),
-                total_tokens=int(input_tokens + output_tokens),
-                source="DEMO",
-            ),
+            prompt_tokens=int(input_tokens),
+            completion_tokens=int(output_tokens),
+            total_tokens=int(input_tokens + output_tokens),
+            usage_source="DEMO",
             finish_reason="stop",
         )
 

@@ -16,18 +16,14 @@ class ChatRequest(BaseModel):
     max_tokens: Optional[int] = None
 
 
-class UsageInfo(BaseModel):
-    prompt_tokens: Optional[int] = None
-    completion_tokens: Optional[int] = None
-    total_tokens: Optional[int] = None
-    source: str = "UNKNOWN"  # PROVIDER, ESTIMATED, UNKNOWN, DEMO
-
-
 class ChatResponse(BaseModel):
     id: str
     model: str
     content: str
-    usage: UsageInfo
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    total_tokens: Optional[int] = None
+    usage_source: str = "UNKNOWN"
     finish_reason: str = "stop"
 
 

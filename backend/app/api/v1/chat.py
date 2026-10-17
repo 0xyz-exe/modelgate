@@ -67,10 +67,10 @@ async def chat_completion(
             request_id=db_request.id,
             workspace_id=auth.workspace.id,
             application_id=auth.application.id,
-            input_tokens=provider_response.usage.prompt_tokens,
-            output_tokens=provider_response.usage.completion_tokens,
-            total_tokens=provider_response.usage.total_tokens,
-            usage_source=provider_response.usage.source,
+            input_tokens=provider_response.prompt_tokens,
+            output_tokens=provider_response.completion_tokens,
+            total_tokens=provider_response.total_tokens,
+            usage_source=provider_response.usage_source,
         )
         db.add(usage_record)
         db.commit()
@@ -87,10 +87,10 @@ async def chat_completion(
                 )
             ],
             usage=UsageInfo(
-                prompt_tokens=provider_response.usage.prompt_tokens,
-                completion_tokens=provider_response.usage.completion_tokens,
-                total_tokens=provider_response.usage.total_tokens,
-                source=provider_response.usage.source,
+                prompt_tokens=provider_response.prompt_tokens,
+                completion_tokens=provider_response.completion_tokens,
+                total_tokens=provider_response.total_tokens,
+                source=provider_response.usage_source,
             ),
         )
         
