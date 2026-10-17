@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from app.db.session import get_db
 from app.middleware.auth import get_auth_context, AuthContext
-from app.models.request import ChatCompletionRequest, ChatCompletionResponse, Choice, ChatMessage
+from app.models.request import ChatCompletionRequest, ChatCompletionResponse, Choice, ChatMessage, UsageInfo
 from app.providers.demo import DemoProvider
 from app.providers.base import ChatRequest
 from app.db.models import Request, UsageRecord
@@ -86,11 +86,18 @@ async def chat_completion(
                     finish_reason=provider_response.finish_reason,
                 )
             ],
-            usage=provider_response.usage,
+            usage=UsageInfo(
+                prompt_tokens=provider_response.usage.prompt_tokens,
+                completion_tokens=provider_response.usage.completion_tokens,
+                total_tokens=provider_response.usage.total_tokens,
+                source=provider_response.usage.source,
+            ),
         )
         
     except Exception as e:
+        import traceback
         # Record failed request
+        error_detail = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
         db_request = Request(
             workspace_id=auth.workspace.id,
             application_id=auth.application.id,
@@ -101,8 +108,9 @@ async def chat_completion(
             completed_at=datetime.utcnow(),
             latency_ms=int((time.time() - start_time) * 1000),
             error_type="provider_error",
-            error_message=str(e),
+            error_message=error_detail[:500],  # Truncate for DB
         )
         db.add(db_request)
         db.commit()
+        print(f"ERROR in chat completion: {error_detail}")
         raise

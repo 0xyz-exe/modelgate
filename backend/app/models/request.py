@@ -35,3 +35,6 @@ class ChatCompletionResponse(BaseModel):
     model: str
     choices: list[Choice]
     usage: UsageInfo
+    
+    class Config:
+        from_attributes = True  # Allow conversion from provider UsageInfo
