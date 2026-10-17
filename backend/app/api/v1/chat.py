@@ -1,5 +1,5 @@
 """Chat completion endpoint"""
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.db.session import get_db
@@ -9,6 +9,7 @@ from app.models.request import ChatCompletionRequest, ChatCompletionResponse, Ch
 from app.providers.demo import DemoProvider
 from app.providers.base import ChatRequest
 from app.db.models import Request, UsageRecord
+from app.services.quota import quota_enforcer
 import time
 
 router = APIRouter()
@@ -16,23 +17,40 @@ router = APIRouter()
 
 @router.post("/chat/completions", response_model=ChatCompletionResponse)
 async def chat_completion(
+    response: Response,
     request: ChatCompletionRequest,
     auth: AuthContext = Depends(get_auth_context),
     rate_limit_info: dict = Depends(check_rate_limit),
     db: Session = Depends(get_db),
-    response: Response = None,
 ):
     """Chat completion endpoint"""
     start_time = time.time()
     started_at = datetime.utcnow()
     
     # Add rate limit headers to response
-    if response:
-        response.headers["X-RateLimit-Limit"] = str(rate_limit_info["limit"])
-        response.headers["X-RateLimit-Remaining"] = str(rate_limit_info["remaining"])
-        response.headers["X-RateLimit-Reset"] = str(rate_limit_info["reset"])
+    response.headers["X-RateLimit-Limit"] = str(rate_limit_info["limit"])
+    response.headers["X-RateLimit-Remaining"] = str(rate_limit_info["remaining"])
+    response.headers["X-RateLimit-Reset"] = str(rate_limit_info["reset"])
     
-    # ponytail: rate limits, quota checks - add when needed
+    # Check quota
+    quota_allowed, quota_info = quota_enforcer.check_quota(
+        db=db,
+        workspace_id=auth.workspace.id,
+        application_id=auth.application.id
+    )
+    
+    if not quota_allowed:
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error": {
+                    "type": "quota_exceeded",
+                    "code": "quota_limit_exceeded",
+                    "message": f"Token quota exceeded: {quota_info['used']}/{quota_info['limit']} tokens used",
+                    "quota": quota_info
+                }
+            }
+        )
     
     # Use demo provider for MVP
     provider = DemoProvider()
