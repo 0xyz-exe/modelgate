@@ -29,9 +29,10 @@ async def chat_completion(
     provider = DemoProvider()
     
     # Convert to provider format
+    from app.providers.base import ChatMessage as ProviderMessage
     provider_request = ChatRequest(
         model=request.model,
-        messages=[{"role": m.role, "content": m.content} for m in request.messages],
+        messages=[ProviderMessage(role=m.role, content=m.content) for m in request.messages],
         temperature=request.temperature,
         max_tokens=request.max_tokens,
     )
