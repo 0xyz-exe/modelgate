@@ -1,6 +1,6 @@
 """Integration tests for chat endpoint"""
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 from app.db.session import SessionLocal
 from app.db.models import Workspace, Application, APIKey
@@ -8,7 +8,7 @@ from app.utils.crypto import generate_api_key, hash_api_key, get_key_prefix
 
 
 @pytest.fixture
-async def test_api_key():
+def test_api_key():
     """Create a test API key"""
     db = SessionLocal()
     
@@ -52,7 +52,7 @@ async def test_api_key():
 @pytest.mark.asyncio
 async def test_chat_completion_success(test_api_key):
     """Test successful chat completion"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
             "/v1/chat/completions",
             headers={"Authorization": f"Bearer {test_api_key}"},
@@ -77,7 +77,7 @@ async def test_chat_completion_success(test_api_key):
 @pytest.mark.asyncio
 async def test_chat_completion_no_auth():
     """Test chat completion without authentication"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
             "/v1/chat/completions",
             json={
@@ -92,7 +92,7 @@ async def test_chat_completion_no_auth():
 @pytest.mark.asyncio
 async def test_chat_completion_invalid_key():
     """Test chat completion with invalid key"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
             "/v1/chat/completions",
             headers={"Authorization": "Bearer mg_invalid"},
@@ -108,7 +108,7 @@ async def test_chat_completion_invalid_key():
 @pytest.mark.asyncio
 async def test_chat_completion_invalid_request(test_api_key):
     """Test chat completion with invalid request"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.post(
             "/v1/chat/completions",
             headers={"Authorization": f"Bearer {test_api_key}"},

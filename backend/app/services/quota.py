@@ -21,6 +21,7 @@ class QuotaEnforcer:
             (allowed: bool, info: dict)
         """
         # Get quota policy using scope_type/scope_id
+        policy = None
         if application_id:
             policy = db.query(QuotaPolicy).filter(
                 QuotaPolicy.scope_type == "application",

@@ -4,6 +4,28 @@
 
 Open-source unified API gateway for AI providers with usage metering, quotas, and analytics.
 
+## Screenshots
+
+### 1. Gateway Overview & AI Metering Dashboard
+Dashboard metrik sentral menyajikan status telemetri API gateway multi-penyedia model secara *real-time*, memantau volume request harian (74 request dengan 98.6% success rate), latensi P95 perambatan (54,8 ms), total token yang termeterkan (1.480 token), status operasional penyedia upstream (OpenAI, Anthropic, Mistral, dan Demo Mock), alokasi persentase pemakaian model fondasi, serta tabel ringkasan telemetri transaksi terkini.
+
+![Gateway Overview & AI Metering Dashboard](docs/screenshots/01_dashboard.png)
+
+### 2. API Key & Quota Management
+Antarmuka tata kelola kredensial dan pembatasan laju (*rate limiting*) memfasilitasi penerbitan gateway token berlingkup izin khusus (*scoped tokens*) dengan pengacakan SHA-256 yang aman, memantau utilisasi kuota token bulanan (241,9k dari 50M token), menetapkan batas request per menit (600 RPM / 36k RPH), mengontrol batas konkurensi (25 slot), serta mengotomatisasi tindakan proteksi anggaran harian (*auto-throttle*).
+
+![API Key & Quota Management](docs/screenshots/02_api_keys.png)
+
+### 3. Provider Routing & Model Catalog
+Katalog integrasi model dan perutean multi-penyedia menyajikan pemetaan komprehensif ke berbagai endpoint upstream AI (OpenAI Production Gateway, Anthropic Claude Enterprise, Mistral European Endpoints, dan Local Deterministic Demo Mock), menampilkan status kesehatan sirkuit pemutus (*circuit breaker armed*), ambang batas timeout, jendela konteks model (128k–200k tokens), serta kapabilitas multimodalitas dan streaming.
+
+![Provider Routing & Model Catalog](docs/screenshots/03_providers_models.png)
+
+### 4. Real-Time Request Tracing & Token Metering
+Panel investigasi jejak request dan akuntansi token menyajikan rekam jejak setiap transaksi inferensi secara rinci, dilengkapi filter kode status (200 OK dan 429 Rate Limit), visualisasi payload prompt masuk dan respon gateway keluar, dekomposisi token input/output, atribusi sumber data (*PROVIDER reported vs DEMO mock*), serta estimasi biaya per pemanggilan inferensi.
+
+![Real-Time Request Tracing & Token Metering](docs/screenshots/04_request_logs.png)
+
 ## Status
 
 🚧 **Active Development** - MVP Phase  
